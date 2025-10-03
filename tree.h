@@ -1,13 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct Node {
-    int val;
-    char cut;
-    struct Node * left;
-    struct Node * right;
-} Node;
+typedef struct StackNode {
+    char val;
+    struct StackNode * next;
+} StackNode;
+
+typedef struct TreeNode {
+    char val;
+    struct TreeNode * left;
+    struct TreeNode * right;
+} TreeNode;
 
 typedef struct Stack {
-    struct Node * head;
+    struct StackNode * head;
 } Stack;
+
+typedef struct Tree {
+    struct TreeNode * head;
+} Tree;
