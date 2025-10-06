@@ -8,77 +8,116 @@ inputs
 returns completed tree
 */
 Tree * readFile(char * filename, Stack * stack){
-    FILE * f = fopen(filename, 'r');
-    if(!f) return;
+    if(!filename || !stack) return NULL;
+    FILE *f = fopen(filename, "r");
+    if(!f) return NULL;
 
-    Tree * tree = (Tree *)malloc(sizeof(Tree));
-    // tracks which node is non number
-    Tree * prevLeft = NULL;
-    TreeNode * prevRight = NULL;
-    char c;
-    while(fgets(c, 1, f) != NULL){
-        if(c == 'V' || c == 'H'){
-            // pop top 2 in stack
-            // add popped nodes to tree
-            char a = pop(stack); // right node
-            char b = pop(stack); // left node
-            TreeNode * nodeC = createNode(c); // current node
-            // both left and right are numbers
-            if(a != 'V' && a != 'H' && b != 'V' && b != 'H'){
-                TreeNode * prevRight = createNode(a);
-                TreeNode * prevLeft = createNode(b);
-                nodeC->left = prevLeft;
-                nodeC->right = prevRight;
-                prevLeft = NULL;
-                prevRight = NULL;
-            }
-            // right node is number, current node becomes left child of next node
-            else if(a != 'V' && a != 'H'){
-                TreeNode * prevRight = createNode(a);
-                nodeC->left = prevLeft;
-                nodeC->right = prevRight;
-                prevLeft = nodeC;
-                prevRight = NULL;
-            }
-            // left node is number, current node becomes right child of next node
-            else if(b != 'V' && b != 'H'){
-                TreeNode * prevLeft = createNode(b);
-                nodeC->left = prevLeft;
-                nodeC->right = prevRight;
-                prevLeft = NULL;
-                prevRight = nodeC;
-            }
-            // both left and right are non numbers, current node becomes right child of next node
-            else{
-                nodeC->left = prevLeft;
-                nodeC->right = prevRight;
-                prevLeft = NULL;
-                prevRight = nodeC;
-            }
-            stack->head = push(stack, c);
+    initStack(stack);
+
+    char line[100];
+    while(fgets(line, sizeof(line), f) != NULL){
+        /* trim leading/trailing whitespace (including newline) */
+        char *p = line;
+        while(isspace((unsigned char)*p)) p++;
+        char *q = p + strlen(p) - 1;
+        while(q >= p && isspace((unsigned char)*q)) { 
+            *q = '\0'; 
+            q--; 
         }
-        else{
-            // add node to stack
-            stack->head = push(stack, c);
+
+        if(*p == '\0') continue; /* skip empty lines */
+
+        /* internal node? single 'V' or 'H' after trimming */
+        if((p[0] == 'V' || p[0] == 'H') && p[1] == '\0'){
+            TreeNode * r = pop(stack); /* right subtree */
+            TreeNode * l = pop(stack); /* left subtree */
+            if(!l || !r){
+                /* malformed: push back any popped nodes and cleanup */
+                if(r) push(stack, r);
+                if(l) push(stack, l);
+                fclose(f);
+                return NULL;
+            }
+            TreeNode *node = createCutNode(p[0]);
+            if(!node){ fclose(f); return NULL; }
+            node->left = l;
+            node->right = r;
+            push(stack, node);
+        } else {
+            /* try to parse leaf format: "%d(%d,%d)" */
+            int label, w, h;
+            int nmatched = sscanf(p, "%d ( %d , %d )", &label, &w, &h);
+            if(nmatched == 3){
+                TreeNode *leaf = createLeafNode(label, w, h);
+                if(!leaf){ fclose(f); return NULL; }
+                push(stack, leaf);
+            } else {
+                /* permissive fallback parse */
+                char *paren = strchr(p, '(');
+                if(paren){
+                    *paren = '\0';
+                    if(sscanf(p, " %d", &label) == 1){
+                        int inside_w=0, inside_h=0;
+                        if(sscanf(paren+1, " %d , %d )", &inside_w, &inside_h) == 2){
+                            TreeNode *leaf = createLeafNode(label, inside_w, inside_h);
+                            if(!leaf){ fclose(f); return NULL; }
+                            push(stack, leaf);
+                            continue;
+                        }
+                    }
+                    *paren = '('; /* restore */
+                }
+                /* malformed line */
+                fclose(f);
+                return NULL;
+            }
         }
     }
-    tree->head = (prevLeft) ? prevLeft : prevRight;
+
+    fclose(f);
+
+    /* After processing, stack should have exactly one TreeNode (the root) */
+    TreeNode * root = pop(stack);
+    if(!isEmpty(stack)){
+        while(!isEmpty(stack)){
+            TreeNode *t = pop(stack);
+            freeTreeNode(t);
+        }
+        if(root) freeTreeNode(root);
+        return NULL;
+    }
+
+    Tree * tree = (Tree *)malloc(sizeof *tree);
+    if(!tree){
+        freeTreeNode(root);
+        return NULL;
+    }
+    tree->head = root;
     return tree;
 }
 
+/*
+initializes stack
+inputs
+    stack - stack of nodes
+*/
+void initStack(Stack * s){
+    if(!s) return;
+    s->head = NULL;
+}
 /*
 removes head from stack
 inputs
     stack - stack of nodes
 returns value of removed head
 */
-char pop(Stack * stack){
-    if(!stack->head) return NULL;
-    StackNode * next = stack->head->next;
-    char val = stack->head->val;
-    free(stack->head);
-    stack->head = next;
-    return val;
+TreeNode * pop(Stack * s){
+    if(!s || !s->head) return NULL;
+    StackNode *top = s->head;
+    TreeNode *tn = top->tn;
+    s->head = top->next;
+    free(top);
+    return tn;
 }
 
 /*
@@ -88,9 +127,10 @@ inputs
     node - node to be added to stack
 returns new stack
 */
-StackNode * push(Stack * stack, char c){
+StackNode * push(Stack * stack, TreeNode * tn){
     StackNode * node = (StackNode *)malloc(sizeof(StackNode));
-    node->val = c;
+    if(!node) return NULL;
+    node->tn = tn;
     node->next = stack->head;
     stack->head = node;
     return stack->head;
@@ -102,30 +142,66 @@ inputs
     stack - stack of nodes
 returns 0 for empty, 1 for not empty
 */
-int isEmpty(Stack * stack){
-    if(!stack->head) return 1;
-    return 0;
+int isEmpty(Stack *s){
+    return (s == NULL || s->head == NULL);
 }
 
-TreeNode * createNode(char c){
-    TreeNode * node = (TreeNode *)malloc(sizeof(node));
-    node->val = c;
-    node->left = NULL;
-    node->right = NULL;
-
-    return node;
+/*
+creates leaf node
+inputs
+    label - label of leaf node
+    w - width of leaf node
+    h - height of leaf node
+*/
+TreeNode * createLeafNode(int label, int w, int h){
+    TreeNode *n = (TreeNode *)malloc(sizeof(TreeNode));
+    if(!n) return NULL;
+    n->cutType = 'L';
+    n->label = label;
+    n->width = w;
+    n->height = h;
+    n->left = n->right = NULL;
+    return n;
 }
 
-void freeStack(Stack * stack){
-    if(!stack) return;
-    StackNode * curr = stack->head;
+/*
+creates cut node
+inputs
+    cut - type of cut (V or H)
+*/
+TreeNode * createCutNode(char cut){
+    if(cut != 'V' && cut != 'H') return NULL;
+    TreeNode *n = (TreeNode *)malloc(sizeof(*n));
+    if(!n) return NULL;
+    n->cutType = cut;
+    n->label = 0;
+    n->width = n->height = 0;
+    n->left = n->right = NULL;
+    return n;
+}
+
+/*
+frees stack
+inputs
+    stack - stack of nodes
+*/
+void freeStack(Stack *s){
+    if(!s) return;
+    StackNode *curr = s->head;
     while(curr){
-        StackNode * temp = curr->next;
+        StackNode *tmp = curr->next;
         free(curr);
-        curr = temp;
+        curr = tmp;
     }
-    free(stack);
+    /* do not free the TreeNodes pointed to by stack (they belong to the tree) */
+    s->head = NULL;
 }
+
+/*
+frees tree nodes recursively
+inputs
+    node - node to be freed
+*/
 void freeTreeNode(TreeNode * node){
     if(!node) return;
     freeTreeNode(node->left);
@@ -133,7 +209,13 @@ void freeTreeNode(TreeNode * node){
     free(node);
 }
 
+/*
+frees entire tree
+inputs
+    tree - tree to be freed
+*/
 void freeTree(Tree * tree){
+    if(!tree) return;
     freeTreeNode(tree->head);
     free(tree);
 }
