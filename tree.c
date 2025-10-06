@@ -16,20 +16,10 @@ Tree * readFile(char * filename, Stack * stack){
 
     char line[100];
     while(fgets(line, sizeof(line), f) != NULL){
-        /* trim leading/trailing whitespace (including newline) */
-        
         char *p = line;
-        /*
-        while(isspace((unsigned char)*p)) p++;
-        char *q = p + strlen(p) - 1;
-        while(q >= p && isspace((unsigned char)*q)) { 
-            *q = '\0'; 
-            q--; 
-        }
-        */
         if(*p == '\0') continue; /* skip empty lines */
 
-        /* internal node? single 'V' or 'H' after trimming */
+        /* if V or H, pop two nodes and create cut node */
         if((p[0] == 'V' || p[0] == 'H')){
             TreeNode * r = pop(stack); /* right subtree */
             TreeNode * l = pop(stack); /* left subtree */
