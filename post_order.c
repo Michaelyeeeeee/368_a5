@@ -1,28 +1,26 @@
 #include "post_order.h"
-#include "tree.h"
-
 /*
 prints a single node
 inputs
     node - node to be printed
 */
-void printNode(TreeNode * node){
-    if(!node) return;
+void writeNode(FILE * out, TreeNode * node){
+    if(!out || !node) return;
     if(node->cutType == 'L'){
-        printf("%d(%d,%d)\n", node->label, node->width, node->height);
+        fprintf(out, "%d(%d,%d)\n", node->label, node->width, node->height);
     } else {
-        printf("%c\n", node->cutType);
+        fprintf(out, "%c\n", node->cutType);
     }
 }
 
 /*
-prints tree in post-order
+prints tree in pre-order
 inputs
     node - root of tree to be printed
 */
-void printTree(TreeNode * node){
-    if(!node) return;
-    printTree(node->left);
-    printNode(node);
-    printTree(node->right);
+void writeTree(FILE * out, TreeNode * node){
+    if(!out || !node) return;
+    writeNode(out, node);
+    writeTree(out, node->left);
+    writeTree(out, node->right);
 }

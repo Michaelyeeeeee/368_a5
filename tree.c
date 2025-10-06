@@ -17,18 +17,20 @@ Tree * readFile(char * filename, Stack * stack){
     char line[100];
     while(fgets(line, sizeof(line), f) != NULL){
         /* trim leading/trailing whitespace (including newline) */
+        
         char *p = line;
+        /*
         while(isspace((unsigned char)*p)) p++;
         char *q = p + strlen(p) - 1;
         while(q >= p && isspace((unsigned char)*q)) { 
             *q = '\0'; 
             q--; 
         }
-
+        */
         if(*p == '\0') continue; /* skip empty lines */
 
         /* internal node? single 'V' or 'H' after trimming */
-        if((p[0] == 'V' || p[0] == 'H') && p[1] == '\0'){
+        if((p[0] == 'V' || p[0] == 'H')){
             TreeNode * r = pop(stack); /* right subtree */
             TreeNode * l = pop(stack); /* left subtree */
             if(!l || !r){
@@ -46,28 +48,13 @@ Tree * readFile(char * filename, Stack * stack){
         } else {
             /* try to parse leaf format: "%d(%d,%d)" */
             int label, w, h;
-            int nmatched = sscanf(p, "%d ( %d , %d )", &label, &w, &h);
+            int nmatched = sscanf(p, "%d(%d,%d)", &label, &w, &h);
             if(nmatched == 3){
                 TreeNode *leaf = createLeafNode(label, w, h);
                 if(!leaf){ fclose(f); return NULL; }
                 push(stack, leaf);
             } else {
-                /* permissive fallback parse */
-                char *paren = strchr(p, '(');
-                if(paren){
-                    *paren = '\0';
-                    if(sscanf(p, " %d", &label) == 1){
-                        int inside_w=0, inside_h=0;
-                        if(sscanf(paren+1, " %d , %d )", &inside_w, &inside_h) == 2){
-                            TreeNode *leaf = createLeafNode(label, inside_w, inside_h);
-                            if(!leaf){ fclose(f); return NULL; }
-                            push(stack, leaf);
-                            continue;
-                        }
-                    }
-                    *paren = '('; /* restore */
-                }
-                /* malformed line */
+                printf("Malformed line: %s\n", line);
                 fclose(f);
                 return NULL;
             }

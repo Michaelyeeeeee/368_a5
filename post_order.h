@@ -4,5 +4,5 @@
 #include <ctype.h>
 #include "tree.h"
 
-void printNode(TreeNode * node);
-void printTree(TreeNode * node);
+void writeNode(FILE * out, TreeNode * node);
+void writeTree(FILE * out, TreeNode * node);
