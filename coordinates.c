@@ -8,7 +8,7 @@ void printCoord(TreeNode * node, int x, int y, FILE * out){
         printCoord(node->left, x, y, out);
         printCoord(node->right, x + node->left->width, y, out);
     } else if(node->cutType == 'H'){
-        printCoord(node->left, x, node->right->height, out);
+        printCoord(node->left, x, y + node->right->height, out);
         printCoord(node->right, x, y, out);
     }
 }
