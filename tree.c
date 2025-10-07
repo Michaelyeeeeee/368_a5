@@ -14,10 +14,9 @@ Tree * readFile(char * filename, Stack * stack){
 
     initStack(stack);
 
-    char line[100];
+    char line[10000];
     while(fgets(line, sizeof(line), f) != NULL){
         char *p = line;
-        if(*p == '\0') continue; /* skip empty lines */
 
         /* if V or H, pop two nodes and create cut node */
         if((p[0] == 'V' || p[0] == 'H')){
@@ -38,6 +37,7 @@ Tree * readFile(char * filename, Stack * stack){
         } else {
             /* try to parse leaf format: "%d(%d,%d)" */
             int label, w, h;
+            // line by line in string line
             int nmatched = sscanf(p, "%d(%d,%d)", &label, &w, &h);
             if(nmatched == 3){
                 TreeNode *leaf = createLeafNode(label, w, h);

@@ -10,10 +10,10 @@ int main(int argc, char **argv){
     }
 
     // retrieve filenames from command line arguments
-    const char *infile = argv[1];
-    const char *outpost = argv[2];
-    const char *outdim = argv[3];
-    const char *outcoord = argv[4];
+    char *infile = argv[1];
+    char *outpost = argv[2];
+    char *outdim = argv[3];
+    char *outcoord = argv[4];
 
     Stack s;
     /* readFile in your tree.c expects char * in some versions; cast to match signature */
