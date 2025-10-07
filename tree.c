@@ -14,7 +14,7 @@ Tree * readFile(char * filename, Stack * stack){
 
     initStack(stack);
 
-    char line[10000];
+    char line[999999999];
     while(fgets(line, sizeof(line), f) != NULL){
         char *p = line;
 
