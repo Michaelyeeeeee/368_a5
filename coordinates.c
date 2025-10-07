@@ -1,5 +1,13 @@
 #include "coordinates.h"
 
+/*
+prints coordinates of a single node
+inputs
+    node - node to be printed
+    x - x coordinate of bottom-left corner of node
+    y - y coordinate of bottom-left corner of node
+    out - file to print to
+*/
 void printCoord(TreeNode * node, int x, int y, FILE * out){
     if(!node) return;
     if(node->cutType == 'L'){
@@ -13,6 +21,12 @@ void printCoord(TreeNode * node, int x, int y, FILE * out){
     }
 }
 
+/*
+prints coordinates of all leaf nodes
+inputs
+    node - root of tree
+    out - file to print to
+*/
 void printAllCoords(TreeNode * node, FILE * out){
     if(!node) return;
     printCoord(node, 0, 0, out);

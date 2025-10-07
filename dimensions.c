@@ -1,5 +1,12 @@
 #include "dimensions.h"
 
+/*
+prints a single node in post-order with dimensions
+inputs
+    node - node to be printed
+    width - pointer to width variable to store width of node
+    height - pointer to height variable to store height of node
+*/
 void writePostNode(FILE * out, TreeNode * node, int * width, int * height){
     if(!out || !node) return;
     if(node->cutType == 'L'){
@@ -13,6 +20,13 @@ void writePostNode(FILE * out, TreeNode * node, int * width, int * height){
     }
 }
 
+/*
+prints tree in post-order with dimensions
+inputs
+    node - root of tree to be printed
+    width - pointer to width variable to store width of tree
+    height - pointer to height variable to store height of tree
+*/
 void writePostTree(FILE * out, TreeNode * node, int * width, int * height){
     if(!out || !node) return;
     writePostTree(out, node->left, width, height);

@@ -9,6 +9,7 @@ int main(int argc, char **argv){
         return 1;
     }
 
+    // retrieve filenames from command line arguments
     const char *infile = argv[1];
     const char *outpost = argv[2];
     const char *outdim = argv[3];
@@ -21,7 +22,7 @@ int main(int argc, char **argv){
         fprintf(stderr, "Failed to read tree from '%s'\n", infile);
         return 2;
     }
-
+    // write the post-order traversal to outpost
     FILE *fpost = fopen(outpost, "w");
     if(!fpost){
         perror("fopen outpost");
@@ -29,11 +30,10 @@ int main(int argc, char **argv){
         freeStack(&s);
         return 3;
     }
-
     writeTree(fpost, t->head);
-
     fclose(fpost);
 
+    // write the dimensions to outdim
     FILE *fdim = fopen(outdim, "w");
     if(!fdim){
         perror("fopen outdim");
@@ -45,6 +45,7 @@ int main(int argc, char **argv){
     writePostTree(fdim, t->head, &width, &height);
     fclose(fdim);
 
+    // write the coordinates to outcoord
     FILE * fcoord = fopen(outcoord, "w");
     if(!fcoord){
         perror("fopen outcoord");
