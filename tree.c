@@ -26,7 +26,7 @@ Tree * readFile(char * filename, Stack * stack){
                 // if failed pop, put back any popped nodes
                 if(r) push(stack, r);
                 if(l) push(stack, l);
-                fclose(f);
+                fclose(f);  
                 return NULL;
             }
             TreeNode *node = createCutNode(p[0]);

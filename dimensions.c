@@ -14,7 +14,7 @@ void writePostNode(FILE * out, TreeNode * node, int * width, int * height){
     } else {
         *width = (node->cutType == 'V') ? (node->left->width + node->right->width) : (node->left->width > node->right->width ? node->left->width : node->right->width);
         node->width = *width;
-        *height = (node->cutType == 'H') ? (node->left->height + node->right->height) : (node->left->width > node->right->width ? node->left->width : node->right->width);
+        *height = (node->cutType == 'H') ? (node->left->height + node->right->height) : (node->left->height > node->right->height ? node->left->height : node->right->height);
         node->height = *height;
         fprintf(out, "%c(%d,%d)\n", node->cutType, *width, *height);
     }
