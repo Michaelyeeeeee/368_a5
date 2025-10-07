@@ -9,7 +9,7 @@ TARGET = a5
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $(OBJS) -lm
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@

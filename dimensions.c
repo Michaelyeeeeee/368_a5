@@ -12,9 +12,9 @@ void writePostNode(FILE * out, TreeNode * node, int * width, int * height){
     if(node->cutType == 'L'){
         fprintf(out, "%d(%d,%d)\n", node->label, node->width, node->height);
     } else {
-        *width = (node->cutType == 'V') ? (node->left->width + node->right->width) : fmax(node->left->width, node->right->width);
+        *width = (node->cutType == 'V') ? (node->left->width + node->right->width) : (node->left->width > node->right->width ? node->left->width : node->right->width);
         node->width = *width;
-        *height = (node->cutType == 'H') ? (node->left->height + node->right->height) : fmax(node->left->height, node->right->height);
+        *height = (node->cutType == 'H') ? (node->left->height + node->right->height) : (node->left->width > node->right->width ? node->left->width : node->right->width);
         node->height = *height;
         fprintf(out, "%c(%d,%d)\n", node->cutType, *width, *height);
     }
