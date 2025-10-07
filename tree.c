@@ -23,7 +23,7 @@ Tree * readFile(char * filename, Stack * stack){
             TreeNode * r = pop(stack); /* right subtree */
             TreeNode * l = pop(stack); /* left subtree */
             if(!l || !r){
-                /* malformed: push back any popped nodes and cleanup */
+                // if failed pop, put back any popped nodes
                 if(r) push(stack, r);
                 if(l) push(stack, l);
                 fclose(f);
@@ -35,7 +35,7 @@ Tree * readFile(char * filename, Stack * stack){
             node->right = r;
             push(stack, node);
         } else {
-            /* try to parse leaf format: "%d(%d,%d)" */
+            // parse leaf node of form label(w,h)
             int label, w, h;
             // line by line in string line
             int nmatched = sscanf(p, "%d(%d,%d)", &label, &w, &h);
@@ -44,7 +44,7 @@ Tree * readFile(char * filename, Stack * stack){
                 if(!leaf){ fclose(f); return NULL; }
                 push(stack, leaf);
             } else {
-                printf("Malformed line: %s\n", line);
+                printf("Error in line: %s\n", line);
                 fclose(f);
                 return NULL;
             }
