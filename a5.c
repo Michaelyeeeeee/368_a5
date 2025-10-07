@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "dimensions.h"
+#include "coordinates.h"
 
 /* usage: ./a5 input.po out_post.txt */
 int main(int argc, char **argv){
-    if(argc != 4){
+    if(argc != 5){
         fprintf(stderr, "usage: %s input.po out_post.txt dim.txt\n", argv[0]);
         return 1;
     }
@@ -12,6 +12,7 @@ int main(int argc, char **argv){
     const char *infile = argv[1];
     const char *outpost = argv[2];
     const char *outdim = argv[3];
+    const char *outcoord = argv[4];
 
     Stack s;
     /* readFile in your tree.c expects char * in some versions; cast to match signature */
@@ -43,6 +44,16 @@ int main(int argc, char **argv){
     int width = 0, height = 0;
     writePostTree(fdim, t->head, &width, &height);
     fclose(fdim);
+
+    FILE * fcoord = fopen(outcoord, "w");
+    if(!fcoord){
+        perror("fopen outcoord");
+        freeTree(t);
+        freeStack(&s);
+        return 5;
+    }
+    printAllCoords(t->head, fcoord);
+    fclose(fcoord); 
 
     freeTree(t);
     freeStack(&s);
