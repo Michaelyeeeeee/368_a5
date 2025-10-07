@@ -3,7 +3,7 @@ CFLAGS = -Wall -g -s
 SRCS = a5.c tree.c post_order.c dimensions.c coordinates.c
 OBJS = $(SRCS:.c=.o)
 TARGET = a5
-
+	
 .PHONY: all clean
 
 all: $(TARGET)
